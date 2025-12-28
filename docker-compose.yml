@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  server:
+    build: .
+    container_name: minitls-server
+    command: sh -c "python3 server/main.py --max-clients ${MAX_SERVER_CLIENTS:-5}"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./captures:/captures
+    networks:
+      - minitls-net
+    stdin_open: true
+    tty: true
+
+  client:
+    build: .
+    command: sh -c "python3 client/main.py --host server"
+    volumes:
+      - ./captures:/captures
+    networks:
+      - minitls-net
+    environment:
+      - SERVER_HOST=server
+    depends_on:
+      - server
+    stdin_open: true
+    tty: true
+
+networks:
+  minitls-net:
+    driver: bridge
