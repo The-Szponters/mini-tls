@@ -37,19 +37,27 @@ def handle_client(conn, addr):
                     msg = json.loads(message_str)
                     if msg.get("type") == "ClientHello":
                         client_pub = msg.get("public_key")
+                        p = msg.get("p")
+                        g = msg.get("g")
 
-                        # Generate Server keys
-                        priv, pub = protocol.generate_keypair()
+                        if not all([client_pub, p, g]):
+                            print(
+                                f"[ERROR] Invalid ClientHello from {addr}: missing p or g"
+                            )
+                            break
+
+                        # Generate Server keys using client's DH parameters
+                        priv, pub = protocol.generate_keypair(p, g)
 
                         # Compute shared secret
-                        secret = protocol.compute_secret(priv, client_pub)
+                        secret = protocol.compute_secret(priv, client_pub, p)
                         enc_key, mac_key = protocol.derive_keys(secret)
 
                         # Log keys for Wireshark analysis
                         try:
-                            with open("server_secrets.log", "a") as f:
+                            with open("/captures/server_secrets.log", "a") as f:
                                 f.write(
-                                    f"Client {addr} | "
+                                    f"Client {addr} | P={p} | G={g} | "
                                     f"ENC_KEY={enc_key.hex()} | "
                                     f"MAC_KEY={mac_key.hex()}\n"
                                 )
@@ -69,7 +77,7 @@ def handle_client(conn, addr):
                                 "enc_key": enc_key,
                                 "mac_key": mac_key,
                             }
-                        print(f"[HANDSHAKE] Keys exchanged with {addr}")
+                        print(f"[HANDSHAKE] Keys exchanged with {addr} (P={p}, G={g})")
                     else:
                         print(
                             f"[ERROR] Expected ClientHello from {addr}, " f"got {msg}"

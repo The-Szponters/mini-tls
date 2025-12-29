@@ -4,21 +4,21 @@ import hmac
 import random
 
 
-# Diffie-Hellman Parameters
-P = 2147483647  # 2^31 - 1
-G = 16807
+# Default Diffie-Hellman Parameters
+DEFAULT_P = 2147483647  # 2^31 - 1
+DEFAULT_G = 16807
 
 
-def generate_keypair():
-    """Generates a private and public key."""
-    private_key = random.randint(1, P - 1)
-    public_key = pow(G, private_key, P)
+def generate_keypair(p, g):
+    """Generates a private and public key using given DH parameters."""
+    private_key = random.randint(1, p - 1)
+    public_key = pow(g, private_key, p)
     return private_key, public_key
 
 
-def compute_secret(private_key, other_public_key):
-    """Computes the shared secret."""
-    return pow(other_public_key, private_key, P)
+def compute_secret(private_key, other_public_key, p):
+    """Computes the shared secret using given modulus p."""
+    return pow(other_public_key, private_key, p)
 
 
 def derive_keys(shared_secret):
