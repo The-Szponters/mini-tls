@@ -83,6 +83,13 @@ Aby zobaczyć zaszyfrowaną komunikację:
 ### Klient
 Dostępne komendy:
 - `connect`: Nawiązuje połączenie z serwerem i wykonuje handshake.
+```py
+# Domyślne parametry
+> connect
+
+# Własne parametry P i G
+> connect 2147483647 16807
+```
 - `send <wiadomość>`: Wysyła szyfrowaną wiadomość.
 - `end`: Kończy sesję (wysyła EndSession) i wymusza ponowny handshake.
 - `quit`: Zamyka aplikację.

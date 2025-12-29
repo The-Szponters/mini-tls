@@ -11,13 +11,15 @@ CWD=$(pwd)
 
 echo "Starting Mini-TLS environment with $NUM_CLIENTS clients (Server max clients: $MAX_SERVER_CLIENTS)..."
 
-docker-compose down
+docker compose down
 
-MAX_SERVER_CLIENTS=$MAX_SERVER_CLIENTS docker-compose up -d --build --scale client=$NUM_CLIENTS
+MAX_SERVER_CLIENTS=$MAX_SERVER_CLIENTS docker compose up -d --build --scale client=$NUM_CLIENTS
 
 echo "Containers started. Opening terminals..."
 
-osascript -e "tell app \"Terminal\" to do script \"docker attach minitls-server\""
+# Open terminal for server
+xterm -title "Mini-TLS Server" -e "docker attach minitls-server; exec bash" 2>/dev/null || \
+echo "[INFO] Could not open terminal for server. Run manually: docker attach minitls-server"
 
 sleep 2
 
@@ -27,7 +29,8 @@ i=1
 for id in $CLIENT_IDS
 do
    echo "Attaching to Client $i ($id)..."
-   osascript -e "tell app \"Terminal\" to do script \"docker attach $id\""
+   xterm -title "Mini-TLS Client $i" -e "docker attach $id; exec bash" 2>/dev/null || \
+   echo "[INFO] Could not open terminal for client $i. Run manually: docker attach $id"
    ((i++))
 done
 
